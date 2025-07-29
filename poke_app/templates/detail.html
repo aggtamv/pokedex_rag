@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ pokemon.name }} Details{% endblock %}
+
+{% block content %}
+<a href="/" class="btn btn-outline-secondary mb-3">← Back</a>
+
+<div class="card shadow text-center">
+    <div class="card-header">
+        <h2>#{{ pokemon.id }} - {{ pokemon.name }}</h2>
+    </div>
+    <div class="card-body">
+        <img src="{{ pokemon.sprite }}" alt="{{ pokemon.name }}" class="mb-3">
+        
+        <p><strong>Height:</strong> {{ pokemon.height }}</p>
+        <p><strong>Weight:</strong> {{ pokemon.weight }}</p>
+
+        <p><strong>Types:</strong> 
+            {% for type in pokemon.types %}
+                <span class="badge bg-primary">{{ type }}</span>
+            {% endfor %}
+        </p>
+
+        <p><strong>Abilities:</strong> 
+            {{ pokemon.abilities | join(', ') }}
+        </p>
+
+        <p><strong>Moves:</strong> 
+            {{ pokemon.moves[:10] | join(', ') }}...
+        </p>
+
+        <audio controls>
+            <source src="{{ pokemon.cry_url }}" type="audio/ogg">
+            Your browser does not support the audio tag.
+        </audio>
+    </div>
+</div>
+{% endblock %}

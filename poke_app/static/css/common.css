@@ -1,0 +1,121 @@
+:root {
+  --primary-color: #fff8dc;
+  --secondary-color: #d32f2f;
+  --accent-color: #fbc02d;
+  --text-color: #4e342e;
+  --font-family: 'Press Start 2P', cursive;
+}
+
+body {
+  background-color: var(--primary-color);
+  background-image: url('/static/img/pokeball.png');
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  background-size: 300px;
+  font-family: var(--font-family);
+  color: var(--text-color);
+  overflow-x: hidden;
+}
+
+/* 🔴 Navbar */
+.pokedex-navbar {
+  background-color: var(--secondary-color);
+  border-bottom: 3px solid #b71c1c;
+}
+
+.navbar-brand-text {
+  color: var(--accent-color);
+  font-size: 1rem;
+  text-shadow: 1px 1px 2px #000;
+  letter-spacing: 1px;
+}
+
+/* 🔵 Pokédex UI Style */
+.card {
+  border-radius: 16px;
+  background: linear-gradient(145deg, #ffe082, #ffd54f);
+  border: 3px solid var(--secondary-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 4px 4px 12px #b71c1caa;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 24px #ffeb3bcc;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-shadow: 0 0 5px #d32f2faa;
+}
+
+.card-text {
+  font-size: 0.8rem;
+  color: #5d4037;
+  font-weight: 600;
+}
+
+.pokedex-modal {
+  background-color: var(--secondary-color);
+  border-radius: 16px;
+  color: var(--accent-color);
+  box-shadow: 0 10px 40px rgba(211, 47, 47, 0.6);
+}
+
+.pokedex-header {
+  background-color: #b71c1c;
+  color: var(--accent-color);
+  font-weight: 700;
+  padding: 1rem 1.5rem;
+  text-shadow: 0 0 5px #ffd600;
+}
+
+.pokedex-modal .modal-body {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border-radius: 0 0 16px 16px;
+  padding: 2rem;
+}
+
+/* Animated sprite bounce */
+.bounce-in {
+  animation: bounceIn 0.4s ease;
+}
+
+@keyframes bounceIn {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* 🎯 Type badge styles */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.7em;
+  border-radius: 20px;
+  font-weight: 600;
+  color: #4e342e;
+  box-shadow: 0 0 5px #ffd600aa;
+}
+
+/* Type-specific styles */
+.badge.Bug { background-color: #8bc34a; }
+.badge.Dark { background-color: #5d4037; color: #fff; }
+.badge.Dragon { background-color: #7b1fa2; color: #fff; }
+.badge.Electric { background-color: #ffeb3b; }
+.badge.Fairy { background-color: #f48fb1; }
+.badge.Fighting { background-color: #e53935; }
+.badge.Fire { background-color: #f4511e; }
+.badge.Flying { background-color: #64b5f6; }
+.badge.Ghost { background-color: #512da8; color: #fff; }
+.badge.Grass { background-color: #81c784; }
+.badge.Ground { background-color: #a1887f; }
+.badge.Ice { background-color: #4fc3f7; }
+.badge.Normal { background-color: #e0e0e0; }
+.badge.Poison { background-color: #ab47bc; }
+.badge.Psychic { background-color: #f06292; }
+.badge.Rock { background-color: #8d6e63; }
+.badge.Steel { background-color: #b0bec5; }
+.badge.Water { background-color: #42a5f5; }

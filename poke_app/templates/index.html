@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}Pokémon Index{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4">Pokémon (Gen 1–3)</h1>
+
+<!-- 🔍 SEARCH & FILTER BAR -->
+<div class="row mb-4">
+  <div class="col-md-6">
+    <input id="searchInput" type="text" class="form-control" placeholder="Search by name or ID...">
+  </div>
+  <div class="col-md-6">
+    <select id="typeFilter" class="form-select">
+      <option value="">Filter by type</option>
+      {% set all_types = ['Normal','Fire','Water','Grass','Electric','Ice','Fighting','Poison','Ground','Flying','Psychic','Bug','Rock','Ghost','Dragon','Dark','Steel','Fairy'] %}
+      {% for type in all_types %}
+        <option value="{{ type }}">{{ type }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<!-- 🃏 POKÉMON CARD GRID -->
+<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-4">
+  {% for pokemon in pokemon_list %}
+    <div class="col pokemon-card"
+        data-name="{{ pokemon.name | lower }}"
+        data-id="{{ pokemon.id }}"
+        data-types="{{ pokemon.types }}">
+      <div class="card h-100 text-center shadow-sm" style="cursor: pointer;" onclick="loadPokemon({{ pokemon.id }})">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ pokemon.id }}.png"
+            class="card-img-top mx-auto mt-2" alt="{{ pokemon.name }}" style="width:96px;">
+        <div class="card-body p-2">
+          <h6 class="card-title mb-1">#{{ pokemon.id }} {{ pokemon.name }}</h6>
+          <div>
+            {% for type in pokemon.types.split(',') %}
+              <span class="badge {{ type.strip() }}">{{ type.strip() }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+
+</div>
+
+<!-- Pokedex Modal -->
+<div class="modal fade" id="pokemonModal" tabindex="-1" aria-labelledby="pokemonModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content pokedex-modal">
+      <div class="modal-header pokedex-header">
+        <h5 class="modal-title" id="pokemonModalLabel">Pokémon Info</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body row gx-4 gy-3">
+        <div class="col-md-4 text-center">
+          <img id="modalSprite" src="" alt="" class="img-fluid" style="max-height: 150px;">
+          <audio id="pokemonCry" controls class="mt-3 w-100">
+            <source id="crySource" src="" type="audio/ogg">
+            Your browser does not support the audio tag.
+          </audio>
+        </div>
+        <div class="col-md-8">
+          <p><strong>ID:</strong> <span id="modalId"></span></p>
+          <p><strong>Height:</strong> <span id="modalHeight"></span></p>
+          <p><strong>Weight:</strong> <span id="modalWeight"></span></p>
+          <p><strong>Types:</strong> <span id="modalTypes" class="d-inline-flex flex-wrap gap-1"></span></p>
+          <p><strong>Abilities:</strong> <span id="modalAbilities"></span></p>
+          <p><strong>Moves:</strong> <span id="modalMoves"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+document.getElementById('searchInput').addEventListener('input', filterCards);
+document.getElementById('typeFilter').addEventListener('change', filterCards);
+
+function filterCards() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const type = document.getElementById('typeFilter').value;
+  const cards = document.querySelectorAll('.pokemon-card');
+
+  cards.forEach(card => {
+    const name = card.dataset.name.toLowerCase();
+    const id = card.dataset.id;
+    const types = card.dataset.types;
+
+    const matchesNameOrId = name.includes(search) || id.includes(search);
+    const matchesType = !type || types.includes(type);
+
+    if (matchesNameOrId && matchesType) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function loadPokemon(id) {
+    fetch(`/pokemon/${id}/json`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Fill basic modal info
+            document.getElementById('pokemonModalLabel').innerText = `${data.name} (#${data.id})`;
+            document.getElementById('modalSprite').src = data.sprite;
+            const sprite = document.getElementById('modalSprite');
+            sprite.classList.remove('bounce-in'); // reset animation class
+            void sprite.offsetWidth; // force reflow
+            sprite.classList.add('bounce-in'); // re-add animation
+            document.getElementById('modalId').innerText = data.id;
+            document.getElementById('modalHeight').innerText = data.height;
+            document.getElementById('modalWeight').innerText = data.weight;
+            document.getElementById('modalAbilities').innerText = data.abilities.join(', ');
+            document.getElementById('modalMoves').innerText = data.moves.slice(0, 10).join(', ') + '...';
+
+            // Type badges
+            const typesContainer = document.getElementById('modalTypes');
+            typesContainer.innerHTML = '';
+            data.types.forEach(type => {
+                const badge = document.createElement('span');
+                badge.className = `badge ${type}`;
+                badge.innerText = type;
+                typesContainer.appendChild(badge);
+            });
+
+            document.getElementById('crySource').src = data.cry_url;
+            document.getElementById('pokemonCry').load();
+
+            // Show loading text for Pokédex entry inside the modal (add this element if needed)
+            let pokedexEntryEl = document.getElementById('modalPokedexEntry');
+            if (!pokedexEntryEl) {
+                pokedexEntryEl = document.createElement('pre');
+                pokedexEntryEl.id = 'modalPokedexEntry';
+                pokedexEntryEl.style.whiteSpace = 'pre-wrap';
+                pokedexEntryEl.textContent = 'Loading Pokédex entry...';
+                document.querySelector('.modal-body .col-md-8').appendChild(pokedexEntryEl);
+            } else {
+                pokedexEntryEl.textContent = 'Loading Pokédex entry...';
+            }
+            pokedexEntryEl.textContent = "";
+            // Now fetch the RAG generated Pokédex entry from FastAPI /ask endpoint
+            fetch('http://127.0.0.1:8000/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: data.name })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Network error");
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let result = "";
+
+                function read() {
+                    return reader.read().then(({ done, value }) => {
+                        if (done) return;
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        result += chunk;
+                        pokedexEntryEl.textContent += chunk; // update as it streams
+                        return read();
+                    });
+                }
+
+                  return read();
+              })
+              .catch(error => {
+                  console.error("Streaming error:", error);
+                  pokedexEntryEl.textContent = "Failed to stream Pokédex entry.";
+              });
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('pokemonModal'));
+            modal.show();
+        })
+        .catch(err => {
+            alert("Failed to load Pokémon details.");
+            console.error(err);
+        });
+}
+
+
+
+</script>
+{% endblock %}
+
+
+
+
